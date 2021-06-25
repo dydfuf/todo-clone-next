@@ -1,17 +1,14 @@
 import React, { useMemo, useCallback, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
 import palette from "../styles/palette";
+import { RootState } from "../store";
+import { todoActions } from "../store/todo";
 
 import TrashCanIcon from "../public/static/svg/trash_can.svg";
 import CheckMarkIcon from "../public/static/svg/check_mark.svg";
 
 import { checkTodoAPI, deleteTodoAPI } from "../lib/api/todo";
-import { TodoType } from "../types/todo";
-
-interface IProps {
-  todos: TodoType[];
-}
-
 const Container = styled.div`
   width: 100%;
 
@@ -126,7 +123,10 @@ const Container = styled.div`
   }
 `;
 
-const TodoList: React.FC<IProps> = ({ todos }) => {
+const TodoList: React.FC = () => {
+  const todos = useSelector((state: RootState) => state.todo.todos);
+  const dispatch = useDispatch();
+
   const getTodoColorNums = useCallback(() => {
     let red = 0;
     let orange = 0;
@@ -195,13 +195,13 @@ const TodoList: React.FC<IProps> = ({ todos }) => {
       await checkTodoAPI(id);
       console.log("체크하였습니다.");
 
-      const newTodos = localTodos.map((todo) => {
+      const newTodos = todos.map((todo) => {
         if (todo.id === id) {
           return { ...todo, checked: !todo.checked };
         }
         return todo;
       });
-      setLocalTodos(newTodos);
+      dispatch(todoActions.setTodo(newTodos));
     } catch (e) {
       console.log(e);
     }
